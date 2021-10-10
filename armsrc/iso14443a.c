@@ -1016,9 +1016,9 @@ bool SimulateIso14443aInit(int tagType, int flags, uint8_t *data, tag_response_i
     // Prepare the optional third SAK  (for 10 byte UID), drop the cascade bit
     static uint8_t rSAKc3[3]  = { 0x00 };
     // dummy ATS (pseudo-ATR), answer to RATS
-//    static uint8_t rRATS[] = { 0x04, 0x58, 0x80, 0x02, 0x00, 0x00 };
-    static uint8_t rRATS[] = { 0x05, 0x75, 0x80, 0x60, 0x02, 0x00, 0x00 };
-
+//    static uint8_t rRATS[] =   { 0x04, 0x58, 0x80, 0x02, 0x00, 0x00 };
+//    static uint8_t rRATS[] =   { 0x05, 0x75, 0x80, 0x60, 0x02, 0x00, 0x00 };
+    static uint8_t rRATS[] =     { 0x0c, 0x75, 0x77, 0x80, 0x02, 0xc1, 0x05, 0x2f, 0x2f, 0x01, 0xbc, 0xd6, 0x00, 0x00};
     // GET_VERSION response for EV1/NTAG
     static uint8_t rVERSION[10] = { 0x00 };
     // READ_SIG response for EV1/NTAG
@@ -1110,7 +1110,12 @@ bool SimulateIso14443aInit(int tagType, int flags, uint8_t *data, tag_response_i
             sak = 0x20;
         }
         break;
-
+        case 11: { // Mifare Plus EV1
+            rATQA[0] = 0x44;
+            rATQA[1] = 0x00;
+            sak = 0x20;
+        }
+        break;
         default: {
             if (g_dbglevel >= DBG_ERROR) Dbprintf("Error: unknown tagtype (%d)", tagType);
             return false;
@@ -1229,7 +1234,8 @@ bool SimulateIso14443aInit(int tagType, int flags, uint8_t *data, tag_response_i
     // Coded responses need one byte per bit to transfer (data, parity, start, stop, correction)
     // 80 * 8 data bits, 80 * 1 parity bits, 11 start bits, 11 stop bits, 11 correction bits
     // 80 * 8 + 80 + 11 + 11 + 11 == 753
-#define ALLOCATED_TAG_MODULATION_BUFFER_SIZE 753
+    // Add +bytes for new RRATS
+#define ALLOCATED_TAG_MODULATION_BUFFER_SIZE (753+ (14-7)*8 + (14-7))
 
     uint8_t *free_buffer = BigBuf_malloc(ALLOCATED_TAG_MODULATION_BUFFER_SIZE);
     // modulation buffer pointer and current buffer free space size
@@ -1645,7 +1651,7 @@ void SimulateIso14443aTag(uint8_t tagType, uint8_t flags, uint8_t *data, uint8_t
             AddCrc14A(cmd, sizeof(cmd) - 2);
             EmSendCmd(cmd, sizeof(cmd));
             p_response = NULL;
-
+                       
         } else {
 
             // clear old dynamic responses
@@ -1678,6 +1684,19 @@ void SimulateIso14443aTag(uint8_t tagType, uint8_t flags, uint8_t *data, uint8_t
                     dynamic_response_info.response[2] = 0x00;
                     dynamic_response_info.response_n = 3;
                 }
+            } else if (tagType == 11){
+                if (receivedCmd[0] == MIFARE_PLEV1_READ_EMM) { //TODO && len == 
+                    //TODO
+                    while(1);
+                }
+                else if (receivedCmd[0] == 0x70) {
+                    while(1);
+                }
+                else if (memcmp("\xd1\x11\x00\x8e\xfc", receivedCmd, 5) == 0) {
+                    dynamic_response_info.response[0] = receivedCmd[0];
+                    dynamic_response_info.response_n = 1;                    
+                }
+            
             } else {
 
                 // Check for ISO 14443A-4 compliant commands, look at left nibble

@@ -634,7 +634,8 @@ int CmdHF14ASim(const char *Cmd) {
                   "hf 14a sim -t 7                     -> AMIIBO (NTAG 215),  pack 0x8080\n"
                   "hf 14a sim -t 8                     -> MIFARE Classic 4k\n"
                   "hf 14a sim -t 9                     -> FM11RF005SH Shanghai Metro\n"
-                  "hf 14a sim -t 10                    -> ST25TA IKEA Rothult\n");
+                  "hf 14a sim -t 10                    -> ST25TA IKEA Rothult\n"
+                  "hf 14a sim -t 11                    -> MIFARE Plus EV1 2k\n");
 
     void *argtable[] = {
         arg_param_begin,

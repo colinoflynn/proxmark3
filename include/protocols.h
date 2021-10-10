@@ -30,6 +30,10 @@ Ultralight C
     A0 = Compatibility Write (to accomodate MIFARE commands)
     1A = Step1 Authenticate
     AF = Step2 Authenticate
+Mifare Plus EV1
+    31 = ReadEncryptedMAC_MAC
+    70 = Step1 Authenticate
+    72 = Step2 Authenticate
 
 NTAG i2c 2K
     C2 = SECTOR_SELECT
@@ -191,6 +195,12 @@ ISO 7816-4 Basic interindustry commands. For command APDU's.
 // New Mifare UL Nano commands.  Ref:: (https://www.nxp.com/docs/en/data-sheet/MF0UN_H_00.pdf)
 #define MIFARE_ULNANO_WRITESIG      0xA9
 #define MIFARE_ULNANO_LOCKSIG       0xAC
+
+// New Mifare Plus EV1 commands. Ref:: (https://www.nxp.com/docs/en/data-sheet/MF1P_H_X1Y1_SDS.pdf)
+//   More details available at Ref:: (https://github.com/zhaohuizhang/DanMan/blob/master/jni/nxp/comps/phalMfp/src/phalMfp_Int.h)
+#define MIFARE_PLEV1_READ_EMM       0x31 //MFP Read Encrypted, Mac on response, Mac on command
+#define MIFARE_PLEV1_AUTH_1         0x70
+#define MIFARE_PLEV2_AUTH_2         0x72
 
 // NTAG i2k 2K  uses sector 0, and sector 1 to have access to
 // block 0x00-0xFF.
